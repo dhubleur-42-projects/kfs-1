@@ -105,6 +105,8 @@ void terminal_writestring(const char* data)
 	terminal_write(data, strlen(data));
 }
 
+void pouet();
+
 void kernel_main(void) 
 {
 	/* Initialize terminal interface */
@@ -112,4 +114,6 @@ void kernel_main(void)
 
 	/* Newline support is left as an exercise. */
 	terminal_writestring("42");
+
+	pouet();
 }

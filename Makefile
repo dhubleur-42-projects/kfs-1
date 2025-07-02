@@ -2,10 +2,13 @@ ISO_NAME	=	kfs.iso
 KERNEL_NAME	=	build/kfs.elf
 
 C_SRCS		= 	\
-				kernel.c
+				kernel.c \
+				pic.c \
+				idt.c
 
 ASM_SRCS	=	\
-				boot.s
+				boot.s \
+				io.s
 
 _OBJS		=	${C_SRCS:.c=.o} ${ASM_SRCS:.s=.o}
 OBJS		=	$(addprefix build/, $(_OBJS))
@@ -22,7 +25,7 @@ LINKER		= clang
 LINKERFLAGS	= -target i386-unknown-elf -fuse-ld=lld -nostdlib -static -T configs/linker.ld
 
 QEMU		= qemu-system-i386
-QEMU_ARGS	= -cdrom ${ISO_NAME}
+QEMU_ARGS	= -cdrom
 
 all		:	$(ISO_NAME)
 
@@ -59,6 +62,6 @@ re		:	fclean
 			make ${ISO_NAME}
 
 boot	:	${ISO_NAME}
-	qemu-system-i386 -cdrom ${ISO_NAME}
+	${QEMU} ${QEMU_ARGS} ${ISO_NAME}
 
 .PHONY	:	all clean fclean re boot

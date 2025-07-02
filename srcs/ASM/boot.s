@@ -33,6 +33,15 @@ stack_bottom:
 resb 16384 ; 16 KiB is reserved for stack
 stack_top:
 
+idtr:
+resw 1	; limit
+resd 1	; base
+
+global idt_table
+idt_table:
+resq 256
+idt_table_size: equ $ - idt_table
+
 ; The linker script specifies _start as the entry point to the kernel and the
 ; bootloader will jump to this position once the kernel has been loaded. It
 ; doesn't make sense to return from this function as the bootloader is gone.
@@ -64,6 +73,12 @@ _start:
 	; yet. The GDT should be loaded here. Paging should be enabled here.
 	; C++ features such as global constructors and exceptions will require
 	; runtime support to work as well.
+	extern PIC_remap
+	call PIC_remap
+
+	mov WORD [idtr], idt_table_size - 1
+	mov DWORD [idtr + 2], idt_table
+	lidt [idtr]
 
 	; Enter the high-level kernel. The ABI requires the stack is 16-byte
 	; aligned at the time of the call instruction (which afterwards pushes
@@ -89,3 +104,7 @@ _start:
 .hang:	hlt
 	jmp .hang
 .end:
+
+global default_interrupt_handler_wrapper
+default_interrupt_handler_wrapper:
+    iretd
