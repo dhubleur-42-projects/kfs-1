@@ -33,6 +33,7 @@ stack_bottom:
 resb 16384 ; 16 KiB is reserved for stack
 stack_top:
 
+section .idt
 idtr:
 resw 1	; limit
 resd 1	; base
@@ -105,6 +106,10 @@ _start:
 	jmp .hang
 .end:
 
-global default_interrupt_handler_wrapper
-default_interrupt_handler_wrapper:
+global keyboard_handler_wrapper
+extern keyboard_handler
+keyboard_handler_wrapper:
+    pusha
+    call keyboard_handler
+    popa
     iretd

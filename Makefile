@@ -15,7 +15,7 @@ OBJS		=	$(addprefix build/, $(_OBJS))
 OBJS_DEPEND	=	${OBJS:.o=.d}
 
 CC			=	clang
-CFLAGS		=   -c -target i386-unknown-elf
+CFLAGS		=   -c -target i386-unknown-elf -mgeneral-regs-only -O0 -g3
 INCLUDE		=	-I includes/
 
 ASMC		= nasm
@@ -25,7 +25,7 @@ LINKER		= clang
 LINKERFLAGS	= -target i386-unknown-elf -fuse-ld=lld -nostdlib -static -T configs/linker.ld
 
 QEMU		= qemu-system-i386
-QEMU_ARGS	= -cdrom
+QEMU_ARGS	= -d trace:pic_ioport_write -cdrom
 
 all		:	$(ISO_NAME)
 

@@ -16,9 +16,11 @@
 
 #define INTERRUPT_PL0 GATE_PRES(1) | GATE_PRIV(0) | GATE_TYPE_32B_INTERRUPT | SEG_SELECTOR_TI(0) | SEG_SELECTOR_RPL(0)
 
+extern void keyboard_handler_wrapper();
+
 extern uint32_t idt_table;
 
-uint8_t my_flag; //TEMP
+volatile uint8_t my_flag; //TEMP
 struct interrupt_frame
 {
     uint32_t ip;
@@ -28,31 +30,32 @@ struct interrupt_frame
     uint32_t ss;
 };
 
+//TODO AVOID uint64_t
 void set_gate(uint8_t i_gate, uint32_t offset, uint16_t seg_selector_index, uint64_t flags)
 {
-    //uint64_t descriptor;
     uint64_t descriptor;
 	uint32_t *tmp_address; //TEMP
 	tmp_address = &idt_table;
 	descriptor = GATE_OFFSET(offset) | SEG_SELECTOR_INDEX(seg_selector_index) | flags;
 	tmp_address[i_gate*2+1] = (descriptor & 0xFFFFFFFF00000000) >> 32;
 	tmp_address[i_gate*2] = descriptor & 0xFFFFFFFF;
-//	tmp_address[i_gate] = descriptor;
-//	tmp_address = &descriptor;
-//    uint64_t descriptor2 = descriptor;
-//	*tmp_address = descriptor2;
 }
 
-//TODO Really useful? What if I mask everything except keyboard interrupt
-__attribute__ ((interrupt))
-void interrupt_default_handler (struct stack_frame *frame) { }
+void io_outb(uint16_t, uint8_t);
+uint8_t io_inb(uint16_t);
+void io_wait();
 
+void terminal_writestring(char const *str);
 __attribute__ ((interrupt))
 void interrupt_keyboard_handler (struct stack_frame *frame)
 {
 	(void)frame;
 	
 	my_flag = 1;
+			terminal_writestring("OMG4");
+	uint8_t a = io_inb(0x60);
+			terminal_writestring("OMG4");
+	io_outb(0x20,0x20); //TEMP TODO Use define
 }
 
 void terminal_writestring(char const *str);
@@ -68,14 +71,18 @@ void pouet()
 }
 //	set_gate(33, (uint32_t)&interrupt_keyboard_handler);
 	asm volatile("sti"); //TEMP
-	asm volatile("hlt"); //TEMP
 
+	int i = 0;
 	while (1)
 	{
+		asm volatile("hlt"); //TEMP
+		if (i == 2)
+			terminal_writestring("OMG3");
 		if (my_flag == 1)
 		{
 			terminal_writestring("OMG");
 			my_flag = 0;
+			i += 1;
 		}
 	}
 }
@@ -95,3 +102,9 @@ void idt_set_gate(int n, uint32_t handler) {
     ((uint32_t *)idt_table)[n].flags = 0x8E;
 }
 #endif
+
+void keyboard_handler() {
+    io_outb(0x20, 0x20);
+    io_outb(0x20, 0x20);
+	terminal_writestring("OMG8");
+}
