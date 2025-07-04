@@ -36,8 +36,19 @@ LDFLAGS			=	-m elf_i386 -T $(LD_FILE)
 KERNEL_BIN		=	iso/boot/kernel.bin
 KERNEL_ISO		=	kernel.iso
 
+DOCKER_IMAGE	=	kfs_build_tools
+
 
 all:	$(KERNEL_ISO)
+
+docker_image:
+	docker build -t $(DOCKER_IMAGE) tools/
+
+build: docker_image
+	docker run -v $(PWD):/project -w /project -it $(DOCKER_IMAGE) make
+
+build_bonus: docker_image
+	docker run -v $(PWD):/project -w /project -it $(DOCKER_IMAGE) make BONUS=1
 
 $(KERNEL_BIN): $(OBJS)
 	$(LD) $(LDFLAGS) -o $(KERNEL_BIN) $(OBJS)
@@ -71,4 +82,4 @@ fclean: clean
 re: fclean
 	$(MAKE) all
 
-.PHONY: all clean fclean re
+.PHONY: all clean fclean re docker_image build build_bonus

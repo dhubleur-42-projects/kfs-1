@@ -13,11 +13,11 @@ void kernel_main() {
 
 #else
 
-	vga_clear();
-	reset_screens();
-
 	idt_init();
 	enable_interrupts();
+
+	vga_clear();
+	reset_screens();
 
 	for(;;) {
 		asm volatile("hlt");
