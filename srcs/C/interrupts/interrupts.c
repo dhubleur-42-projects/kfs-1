@@ -16,5 +16,6 @@ void send_eoi(uint8_t irq) {
 }
 
 void default_interrupt_handler() {
+	send_byte_to_port(0xA0, 0x20);
 	send_byte_to_port(0x20, 0x20);
 }

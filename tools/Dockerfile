@@ -8,4 +8,5 @@ RUN apt-get update && apt-get install -y \
 	xorriso \
 	grub-pc-bin \
 	gcc-multilib \
-	nasm
+	nasm \
+	clang
